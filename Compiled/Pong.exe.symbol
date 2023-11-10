@@ -1,0 +1,71 @@
+< THE SYMBOL TABLE >  Pong.exe  --  emu8086 assembler version: 4.08 
+===================================================================================================
+Name                     	Offset    	Size      	Type      	Segment   
+===================================================================================================
+STACK                    	00000     	-5        	SEGMENT   	(ITSELF)  
+DATA                     	00004     	-5        	SEGMENT   	(ITSELF)  
+BALL_0X                  	00000     	2         	VAR       	data      
+BALL_0Y                  	00002     	2         	VAR       	data      
+BALL_X                   	00004     	2         	VAR       	data      
+BALL_Y                   	00006     	2         	VAR       	data      
+BALL_VX                  	00008     	2         	VAR       	data      
+BALL_VY                  	0000A     	2         	VAR       	data      
+BALL_S                   	0000C     	2         	VAR       	data      
+PAD_X                    	0000E     	2         	VAR       	data      
+PAD_Y                    	00010     	2         	VAR       	data      
+PAD_VY                   	00012     	2         	VAR       	data      
+PAD_W                    	00014     	2         	VAR       	data      
+PAD_H                    	00016     	2         	VAR       	data      
+PREV_FRAME               	00018     	1         	VAR       	data      
+RANDOM_COL               	00019     	1         	VAR       	data      
+SCORE                    	0001A     	1         	VAR       	data      
+TEMP                     	0001B     	1         	VAR       	data      
+SCREEN_W                 	0001C     	2         	VAR       	data      
+SCREEN_H                 	0001E     	2         	VAR       	data      
+BOUNDS1_X                	00020     	2         	VAR       	data      
+BOUNDS1_Y                	00022     	2         	VAR       	data      
+BOUNDS1_W                	00024     	2         	VAR       	data      
+BOUNDS1_H                	00026     	2         	VAR       	data      
+BOUNDS2_X                	00028     	2         	VAR       	data      
+BOUNDS2_Y                	0002A     	2         	VAR       	data      
+BOUNDS2_W                	0002C     	2         	VAR       	data      
+BOUNDS2_H                	0002E     	2         	VAR       	data      
+BOUNDS3_X                	00030     	2         	VAR       	data      
+BOUNDS3_Y                	00032     	2         	VAR       	data      
+BOUNDS3_W                	00034     	2         	VAR       	data      
+BOUNDS3_H                	00036     	2         	VAR       	data      
+CODE                     	00008     	-5        	SEGMENT   	(ITSELF)  
+MAIN                     	00000     	-1        	FAR       	code      
+DONE                     	00013     	-1        	LABEL     	code      
+UPDATE                   	00018     	-1        	NEAR      	code      
+LOOP_UPDATE              	00018     	-1        	LABEL     	code      
+RESET                    	00062     	-1        	NEAR      	code      
+SET_GRAPHICS_MODE        	0006F     	-1        	NEAR      	code      
+SET_TEXT_MODE            	00076     	-1        	NEAR      	code      
+SET_PIXEL                	0008F     	-1        	NEAR      	code      
+RENDER_BALL              	0009E     	-1        	NEAR      	code      
+LOOP_RENDER_BALL         	000A6     	-1        	LABEL     	code      
+RENDER_BOUNDS            	000CC     	-1        	NEAR      	code      
+LOOP_RENDER_BOUND1       	000D4     	-1        	LABEL     	code      
+LOOP_RENDER_BOUND2       	00100     	-1        	LABEL     	code      
+LOOP_RENDER_BOUND3       	0012C     	-1        	LABEL     	code      
+RENDER_PAD               	00151     	-1        	NEAR      	code      
+LOOP_RENDER_PAD          	00159     	-1        	LABEL     	code      
+TRANSFORM_BALL           	0017E     	-1        	NEAR      	code      
+NO_COLLISION             	001F8     	-1        	LABEL     	code      
+GAMEOVER                 	001F9     	-1        	LABEL     	code      
+RESET_POS                	00235     	-1        	LABEL     	code      
+NEG_X                    	0023C     	-1        	LABEL     	code      
+NEG_Y                    	00244     	-1        	LABEL     	code      
+TRANSFORM_PAD            	0024C     	-1        	NEAR      	code      
+MOVEUP_PAD               	00266     	-1        	LABEL     	code      
+DONTMOVEUP_PAD           	00275     	-1        	LABEL     	code      
+MOVEDOWN_PAD             	0027C     	-1        	LABEL     	code      
+DONTMOVEDOWN_PAD         	00291     	-1        	LABEL     	code      
+NO_KEY                   	0029C     	-1        	LABEL     	code      
+LED                      	0029E     	-1        	NEAR      	code      
+RANDOM                   	002A6     	-1        	NEAR      	code      
+===================================================================================================
+[ 27/04/2020  --  06:11:06 ?.? ] 
+< END >
+ 

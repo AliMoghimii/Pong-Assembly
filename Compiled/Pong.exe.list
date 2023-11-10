@@ -1,0 +1,799 @@
+EMU8086 GENERATED LISTING. MACHINE CODE <- SOURCE.
+ 
+Pong.exe -- emu8086 assembler version: 4.08  
+ 
+[ 27/04/2020  --  06:11:06 ?.? ] 
+ 
+===================================================================================================
+[LINE]     LOC: MACHINE CODE                          SOURCE
+===================================================================================================
+ 
+[   1]        :                                       title (exe) Graphics System Calls
+[   2]        :                                       
+[   3]        :                                       .model small
+[   4]        :                                       .stack 64
+[   5]        :                                       
+[   6]        :                                       ;--------------------------------------------------------------  Ali Mogihmi - St.ID : 96243085
+[   7]        :                                       ;--------------------------------------------------------------
+[   8]        :                                       ;use on DOSBOX for max performance
+[   9]        :                                       
+[  10]        :                                       .DATA
+[  11]        :                                       
+[  12]        :                                       ;----------- Ball Vars
+[  13]        :                                       
+[  14]    0040: A0 00                                 ball_0x dw 160  ;base position x for ball used to restart
+[  15]    0042: 64 00                                 ball_0y dw 100  ;base position y for ball used to restart
+[  16]        :                                       
+[  17]    0044: 1E 00                                 ball_x dw 30 ;x coordinates of ball
+[  18]    0046: 1E 00                                 ball_y dw 30 ;y coordinates of ball
+[  19]        :                                       
+[  20]    0048: 04 00                                 ball_vx dw 4 ;speed x of ball
+[  21]    004A: 03 00                                 ball_vy dw 3 ;speed y of ball
+[  22]        :                                       
+[  23]    004C: 05 00                                 ball_s dw 5  ;size of ball
+[  24]        :                                       
+[  25]        :                                       ;----------- Pad Vars
+[  26]        :                                       
+[  27]    004E: 36 01                                 pad_x dw 310 ;x coordinates of pad
+[  28]    0050: 1E 00                                 pad_y dw 30  ;y coordinates of pad
+[  29]        :                                       
+[  30]    0052: 07 00                                 pad_vy dw 7  ;speed y of pad
+[  31]        :                                       
+[  32]    0054: 05 00                                 pad_w dw 5   ;pad width  (cx) (x)
+[  33]    0056: 14 00                                 pad_h dw 20  ;pad height (dx) (y)
+[  34]        :                                       
+[  35]        :                                       ;----------- Game Vars
+[  36]        :                                       
+[  37]    0058: 00                                    prev_frame db 0    ;previous frame based on pc time
+[  38]    0059: 0F                                    random_col db 0fH  ;current colour of ball
+[  39]        :                                       
+[  40]    005A: 00                                    score db 0         ;player score
+[  41]    005B: 00                                    temp db 0          ;temp var used for different purposes
+[  42]        :                                       ;life db 3
+[  43]        :                                       
+[  44]        :                                       ;----------- Screen Boundries
+[  45]        :                                       
+[  46]    005C: 40 01                                 screen_w dw 320  ;video mode w is 320
+[  47]    005E: BE 00                                 screen_h dw 190  ;video mode h is 200
+[  48]        :                                       
+[  49]        :                                       ;variables for all 3 boundries
+[  50]        :                                       
+[  51]    0060: 0A 00                                 bounds1_x dw 10
+[  52]    0062: 1B 00                                 bounds1_y dw 27
+[  53]    0064: 25 01                                 bounds1_w dw 293
+[  54]    0066: 03 00                                 bounds1_h dw 3
+[  55]        :                                       
+[  56]    0068: 0A 00                                 bounds2_x dw 10
+[  57]    006A: 1B 00                                 bounds2_y dw 27
+[  58]    006C: 03 00                                 bounds2_w dw 3
+[  59]    006E: A3 00                                 bounds2_h dw 163
+[  60]        :                                       
+[  61]    0070: 0A 00                                 bounds3_x dw 10
+[  62]    0072: BE 00                                 bounds3_y dw 190
+[  63]    0074: 25 01                                 bounds3_w dw 293
+[  64]    0076: 03 00                                 bounds3_h dw 3
+[  65]        :                                       
+[  66]        :                                       ;-------------------------------
+[  67]        :                                       ;-------------------------------
+[  68]        :                                       
+[  69]        :                                       .CODE
+[  70]        :                                       
+[  71]        :                                       ;############################################################################################ MAIN
+[  72]        :                                       ;main procedure used to call main functions and or to end program
+[  73]        :                                       
+[  74]    0080:                                       MAIN PROC FAR
+[  75]        :                                       
+[  76]    0080: B8 04 00                              mov ax , @DATA
+[  77]    0083: 8E D8                                 mov ds , ax
+[  78]        :                                       
+[  79]    0085: B8 00 00                              mov ax , 00H ;used to reset LED
+[  80]    0088: E7 C7                                 out 199 , ax
+[  81]        :                                       
+[  82]        :                                       ;---------- CODE
+[  83]        :                                       ;----------
+[  84]        :                                       
+[  85]    008A: E8 69 00                              call SET_TEXT_MODE  ;used to set initial text (score)
+[  86]        :                                       
+[  87]    008D: E8 5F 00                              call SET_GRAPHICS_MODE ;used to render initial objects and
+[  88]        :                                       
+[  89]    0090: E8 05 00                              call UPDATE ;our game function
+[  90]        :                                       
+[  91]    0093:                                       Done:
+[  92]        :                                       
+[  93]        :                                       ;---------- END
+[  94]        :                                       ;----------
+[  95]        :                                       
+[  96]    0093: B8 00 4C                              mov ax , 4c00h
+[  97]    0096: CD 21                                 int 21H
+[  98]        :                                       
+[  99]        :                                       MAIN ENDP ;Ends program
+[ 100]        :                                       
+[ 101]        :                                       ;############################################################################################
+[ 102]        :                                       
+[ 103]        :                                       ;-------------------------------------------------------------------------------------------- UPDATE
+[ 104]        :                                       ;Updates screen frames and object for each frame based on pc time and time elapsed
+[ 105]        :                                       
+[ 106]    0098:                                       UPDATE PROC
+[ 107]        :                                       
+[ 108]        :                                       ;get system time which ch = hour , cl = minute , dl = 1/100 seconds
+[ 109]        :                                       
+[ 110]    0098:                                       Loop_Update:
+[ 111]        :                                       
+[ 112]    0098: B4 2C                                 mov ah , 2cH
+[ 113]    009A: CD 21                                 int 21H
+[ 114]        :                                       
+[ 115]    009C: 3A 16 18 00                           cmp dl , prev_frame ;still current frame
+[ 116]    00A0: 74 F6                                 je Loop_Update      ;
+[ 117]        :                                       
+[ 118]    00A2: 88 16 18 00                           mov prev_frame , dl ;update the previous frame variable
+[ 119]        :                                       
+[ 120]        :                                       ;--------------------------- \/ SECTION TO DO RENDERINGS \/
+[ 121]        :                                       
+[ 122]    00A6: E8 46 00                              call SET_GRAPHICS_MODE ;reset and clear screen each frame
+[ 123]        :                                       
+[ 124]    00A9: E8 4A 00                              call SET_TEXT_MODE     ;reset and clear texts each frame
+[ 125]        :                                       
+[ 126]    00AC: E8 6F 02                              call LED               ;display score on LED display
+[ 127]        :                                       ;(DOSBOX doesnt support this function, use on emu8086)
+[ 128]        :                                       
+[ 129]    00AF: E8 9A 00                              call RENDER_BOUNDS     ;rendering the boundry lines
+[ 130]        :                                       ;(when using DOSBOX disable this proc to reduce jittering)
+[ 131]        :                                       ;emu8086 doesnt support multiple pages so some visual bugs
+[ 132]        :                                       ;may appear
+[ 133]        :                                       
+[ 134]    00B2: E8 49 01                              call TRANSFORM_BALL    ;move ball and check collisions
+[ 135]        :                                       
+[ 136]    00B5: E8 66 00                              call RENDER_BALL       ;render the ball for frame
+[ 137]        :                                       
+[ 138]    00B8: E8 11 02                              call TRANSFORM_PAD     ;move pad and check collisions
+[ 139]        :                                       
+[ 140]    00BB: E8 13 01                              call RENDER_PAD        ;render the ball for frame
+[ 141]        :                                       
+[ 142]        :                                       ;--------------------------- /\ SECTION TO DO RENDERINGS /\
+[ 143]    00BE: A0 1A 00                              mov al , score
+[ 144]    00C1: 3D 1E 00                              cmp ax , 30            ;needs this much score to win
+[ 145]    00C4: 7C D2                                 jl Loop_Update         ;if above 30 score stop update loop
+[ 146]        :                                       
+[ 147]    00C6: E8 26 00                              call SET_GRAPHICS_MODE     ;clear screen for a final time
+[ 148]        :                                       ;load ending (Win) message
+[ 149]    00C9: B2 57                                 mov dl , 'W'
+[ 150]    00CB: B4 02                                 mov ah , 02H
+[ 151]    00CD: CD 21                                 int 21H
+[ 152]        :                                       
+[ 153]    00CF: B2 4F                                 mov dl , 'O'
+[ 154]    00D1: B4 02                                 mov ah , 02H
+[ 155]    00D3: CD 21                                 int 21H
+[ 156]        :                                       
+[ 157]    00D5: B2 4E                                 mov dl , 'N'
+[ 158]    00D7: B4 02                                 mov ah , 02H
+[ 159]    00D9: CD 21                                 int 21H
+[ 160]        :                                       
+[ 161]    00DB: B2 21                                 mov dl , '!'
+[ 162]    00DD: B4 02                                 mov ah , 02H
+[ 163]    00DF: CD 21                                 int 21H
+[ 164]        :                                       
+[ 165]    00E1: C3                                    ret
+[ 166]        :                                       
+[ 167]        :                                       UPDATE ENDP
+[ 168]        :                                       
+[ 169]        :                                       ;-------------------------------------------------------------------------------------------- RESET
+[ 170]        :                                       ;used to reset ball position (obselete alternate mode for GameOver - refer to TRANSFORM_BALL)
+[ 171]        :                                       
+[ 172]    00E2:                                       RESET PROC
+[ 173]        :                                       
+[ 174]    00E2: A1 00 00                              mov ax , ball_0x
+[ 175]    00E5: A3 04 00                              mov ball_x , ax
+[ 176]        :                                       
+[ 177]    00E8: A1 02 00                              mov ax , ball_0y
+[ 178]    00EB: A3 06 00                              mov ball_y , ax
+[ 179]        :                                       
+[ 180]    00EE: C3                                    ret
+[ 181]        :                                       
+[ 182]        :                                       RESET ENDP
+[ 183]        :                                       
+[ 184]        :                                       ;-------------------------------------------------------------------------------------------- VIDEO_MODE
+[ 185]        :                                       ;used to clear screen and set the graphics mode back on - also used to color the bg
+[ 186]        :                                       
+[ 187]    00EF:                                       SET_GRAPHICS_MODE PROC
+[ 188]        :                                       
+[ 189]    00EF: B4 00                                 mov ah , 00H ;set the graphics mode
+[ 190]    00F1: B0 13                                 mov al , 13H ;video mode is 13H
+[ 191]    00F3: CD 10                                 int 10H
+[ 192]        :                                       
+[ 193]    00F5: C3                                    ret
+[ 194]        :                                       
+[ 195]        :                                       SET_GRAPHICS_MODE ENDP
+[ 196]        :                                       
+[ 197]        :                                       ;-------------------------------------------------------------------------------------------- TEXT_MODE
+[ 198]        :                                       ;used to set the text boxes needed for texts in our program
+[ 199]        :                                       
+[ 200]    00F6:                                       SET_TEXT_MODE PROC
+[ 201]        :                                       
+[ 202]        :                                       ;-------------------------------------------------------Set Score Text (top right)
+[ 203]        :                                       ;-------------------------------------------------------
+[ 204]        :                                       
+[ 205]    00F6: A0 1A 00                              mov al, score
+[ 206]        :                                       
+[ 207]        :                                       ;aam will do the same as AH = AL / 10 and AL = AL mod 10
+[ 208]        :                                       ;but will leave incorrect unpacked bcd values.
+[ 209]        :                                       ;so if our number has double digits like 21 it will be saved as
+[ 210]        :                                       ;AH = 2 and AL = 1 in ascii format
+[ 211]        :                                       
+[ 212]    00F9: D4 0A                                 aam
+[ 213]        :                                       
+[ 214]        :                                       ;the codes are in ascii format so we add 48 or 30H to them to find
+[ 215]        :                                       ;the coresponding characters
+[ 216]        :                                       
+[ 217]    00FB: 80 C4 30                              add ah , 48
+[ 218]    00FE: 04 30                                 add al , 48
+[ 219]        :                                       
+[ 220]        :                                       ;we use bx as a temp to store ax
+[ 221]        :                                       
+[ 222]    0100: 8B D8                                 mov bx, ax
+[ 223]    0102: 8A D7                                 mov dl, bh
+[ 224]        :                                       
+[ 225]    0104: B4 02                                 mov ah, 02H
+[ 226]    0106: CD 21                                 int 21H    ;int 21H w/ AH 02H prints dl (digit 2 or prev AH in this matter)
+[ 227]        :                                       
+[ 228]    0108: 8A D3                                 mov dl, bl
+[ 229]        :                                       
+[ 230]    010A: B4 02                                 mov ah, 02H
+[ 231]    010C: CD 21                                 int 21H    ;int 21H w/ AH 02H prints dl (digit 1 or prev AL in this matter)
+[ 232]        :                                       
+[ 233]        :                                       ;------------------------------------------------------Alternative ( BROKEN - DONT USE)
+[ 234]        :                                       
+[ 235]        :                                       ;mov dl , 11
+[ 236]        :                                       ;cmp dl , 0AH
+[ 237]        :                                       ;jge twoDigit
+[ 238]        :                                       
+[ 239]        :                                       ;mov dx , 00H
+[ 240]        :                                       ;mov dl , 11
+[ 241]        :                                       ;add dl , 48
+[ 242]        :                                       ;mov ah , 2H
+[ 243]        :                                       ;int 21H
+[ 244]        :                                       
+[ 245]        :                                       ;ret
+[ 246]        :                                       
+[ 247]        :                                       ;twoDigit:
+[ 248]        :                                       
+[ 249]        :                                       ;mov dx , 10 ; first we use dx as number 10 in div then we restart it right after div
+[ 250]        :                                       ;mov ax , 00H
+[ 251]        :                                       ;mov al , 11
+[ 252]        :                                       ; score%10 is in dx (dl) and score/10 is in
+[ 253]        :                                       ;div dx
+[ 254]        :                                       ;mov dx , 00H
+[ 255]        :                                       ;mov dh , ah
+[ 256]        :                                       ;dh is 2nd Digit , dl is first Digit (right to left : 2nd.1st)
+[ 257]        :                                       
+[ 258]        :                                       ;mov cl , dl
+[ 259]        :                                       ;mov dl , dh
+[ 260]        :                                       
+[ 261]        :                                       ;add dl , 48
+[ 262]        :                                       ;mov ah , 2H
+[ 263]        :                                       ;int 21H
+[ 264]        :                                       
+[ 265]        :                                       ;mov dl , cl
+[ 266]        :                                       
+[ 267]        :                                       ;add dl , 48
+[ 268]        :                                       ;mov ah , 2H
+[ 269]        :                                       ;int 21H
+[ 270]        :                                       
+[ 271]        :                                       
+[ 272]        :                                       
+[ 273]        :                                       ;-------------------------------------------------------\/ insert other text boxes here \/
+[ 274]        :                                       ;-------------------------------------------------------
+[ 275]        :                                       
+[ 276]        :                                       ;-------------------------------------------------------
+[ 277]        :                                       ;-------------------------------------------------------/\ insert other text boxes here /\
+[ 278]        :                                       
+[ 279]    010E: C3                                    ret
+[ 280]        :                                       
+[ 281]        :                                       SET_TEXT_MODE ENDP
+[ 282]        :                                       
+[ 283]        :                                       ;-------------------------------------------------------------------------------------------- SET SINGLE PIXEL
+[ 284]        :                                       ;this is used just as a demo and test to print a single pixel (ONLY DEBUG)
+[ 285]        :                                       
+[ 286]    010F:                                       SET_PIXEL PROC
+[ 287]        :                                       
+[ 288]    010F: B4 0C                                 mov ah , 0cH ;set to draw a pixel
+[ 289]    0111: B0 0F                                 mov al , 0fH ;set color of the pixel
+[ 290]        :                                       
+[ 291]    0113: 8B 0E 04 00                           mov cx , ball_x  ;coordinate X of pixel (column)
+[ 292]    0117: 8B 16 06 00                           mov dx , ball_y  ;coordinate Y of pixel (row)
+[ 293]        :                                       
+[ 294]    011B: CD 10                                 int 10H
+[ 295]        :                                       
+[ 296]    011D: C3                                    ret
+[ 297]        :                                       
+[ 298]        :                                       SET_PIXEL ENDP
+[ 299]        :                                       
+[ 300]        :                                       ;-------------------------------------------------------------------------------------------- DRAW SQUARE BALL
+[ 301]        :                                       ;used to draw a square ball with the size of ball_s (refer to ball vars in DATA) (Line 011)
+[ 302]        :                                       
+[ 303]    011E:                                       RENDER_BALL PROC
+[ 304]        :                                       
+[ 305]    011E: 8B 0E 04 00                           mov cx , ball_x  ;coordinate X of pixel (column)
+[ 306]    0122: 8B 16 06 00                           mov dx , ball_y  ;coordinate Y of pixel (row)
+[ 307]        :                                       
+[ 308]        :                                       ;----------
+[ 309]    0126:                                       loop_Render_Ball:
+[ 310]        :                                       
+[ 311]    0126: B4 0C                                 mov ah , 0cH ;set to draw a pixel
+[ 312]    0128: A0 19 00                              mov al , random_col ;set color of the pixel
+[ 313]    012B: CD 10                                 int 10H
+[ 314]        :                                       
+[ 315]        :                                       ;draw horizontal
+[ 316]        :                                       
+[ 317]    012D: 41                                    inc cx ;increase the X coordinate (draw to the right)
+[ 318]        :                                       
+[ 319]    012E: 8B C1                                 mov ax , cx
+[ 320]    0130: 2B 06 04 00                           sub ax , ball_x
+[ 321]    0134: 3B 06 0C 00                           cmp ax , ball_s         ;if cx - ball_x is higher than size stop and switch rows
+[ 322]    0138: 7E EC                                 jng loop_Render_Ball
+[ 323]        :                                       
+[ 324]        :                                       ;draw vertical
+[ 325]        :                                       
+[ 326]    013A: 8B 0E 04 00                           mov cx , ball_x ;revert to starter column
+[ 327]        :                                       
+[ 328]    013E: 42                                    inc dx ;increas the row (draw down)
+[ 329]        :                                       
+[ 330]    013F: 8B C2                                 mov ax , dx
+[ 331]    0141: 2B 06 06 00                           sub ax , ball_y
+[ 332]    0145: 3B 06 0C 00                           cmp ax , ball_s         ;if dx - ball_y is higher than size stop and switch rows
+[ 333]    0149: 7E DB                                 jng loop_Render_Ball
+[ 334]        :                                       
+[ 335]    014B: C3                                    ret
+[ 336]        :                                       
+[ 337]        :                                       RENDER_BALL ENDP
+[ 338]        :                                       
+[ 339]        :                                       ;-------------------------------------------------------------------------------------------- RENDER THE BOUNDRIES
+[ 340]        :                                       ;renders the visual indicator of the walls around the game enviroment
+[ 341]        :                                       ;just a repeat of a single function for 3 times (3 walls)
+[ 342]        :                                       
+[ 343]    014C:                                       RENDER_BOUNDS PROC
+[ 344]        :                                       
+[ 345]    014C: 8B 0E 20 00                           mov cx , bounds1_x  ;coordinate X of pixel (column)
+[ 346]    0150: 8B 16 22 00                           mov dx , bounds1_y  ;coordinate Y of pixel (row)
+[ 347]        :                                       
+[ 348]        :                                       ;----------
+[ 349]    0154:                                       loop_Render_Bound1:
+[ 350]        :                                       
+[ 351]    0154: B4 0C                                 mov ah , 0cH ;set to draw a pixel
+[ 352]    0156: B0 0F                                 mov al , 0fH ;set color of the pixel
+[ 353]    0158: CD 10                                 int 10H
+[ 354]        :                                       
+[ 355]        :                                       ;draw horizontal
+[ 356]    015A: 41                                    inc cx ;increase the X coordinate (draw to the right)
+[ 357]        :                                       
+[ 358]    015B: 8B C1                                 mov ax , cx
+[ 359]    015D: 2B 06 20 00                           sub ax , bounds1_x
+[ 360]    0161: 3B 06 24 00                           cmp ax , bounds1_w
+[ 361]    0165: 7E ED                                 jng loop_Render_Bound1
+[ 362]        :                                       
+[ 363]        :                                       ;----------
+[ 364]        :                                       
+[ 365]        :                                       ;draw vertical
+[ 366]    0167: 8B 0E 20 00                           mov cx , bounds1_x ;revert to starter column
+[ 367]        :                                       
+[ 368]    016B: 42                                    inc dx
+[ 369]        :                                       
+[ 370]    016C: 8B C2                                 mov ax , dx
+[ 371]    016E: 2B 06 22 00                           sub ax , bounds1_y
+[ 372]    0172: 3B 06 26 00                           cmp ax , bounds1_h
+[ 373]    0176: 7E DC                                 jng loop_Render_Bound1
+[ 374]        :                                       ;----------
+[ 375]        :                                       
+[ 376]    0178: 8B 0E 28 00                           mov cx , bounds2_x  ;coordinate X of pixel (column)
+[ 377]    017C: 8B 16 2A 00                           mov dx , bounds2_y  ;coordinate Y of pixel (row)
+[ 378]        :                                       
+[ 379]        :                                       ;----------
+[ 380]    0180:                                       loop_Render_Bound2:
+[ 381]        :                                       
+[ 382]    0180: B4 0C                                 mov ah , 0cH ;set to draw a pixel
+[ 383]    0182: B0 0F                                 mov al , 0fH ;set color of the pixel
+[ 384]    0184: CD 10                                 int 10H
+[ 385]        :                                       
+[ 386]        :                                       ;draw horizontal
+[ 387]    0186: 41                                    inc cx ;increase the X coordinate (draw to the right)
+[ 388]        :                                       
+[ 389]    0187: 8B C1                                 mov ax , cx
+[ 390]    0189: 2B 06 28 00                           sub ax , bounds2_x
+[ 391]    018D: 3B 06 2C 00                           cmp ax , bounds2_w
+[ 392]    0191: 7E ED                                 jng loop_Render_Bound2
+[ 393]        :                                       
+[ 394]        :                                       ;----------
+[ 395]        :                                       
+[ 396]        :                                       ;draw vertical
+[ 397]    0193: 8B 0E 28 00                           mov cx , bounds2_x ;revert to starter column
+[ 398]        :                                       
+[ 399]    0197: 42                                    inc dx
+[ 400]        :                                       
+[ 401]    0198: 8B C2                                 mov ax , dx
+[ 402]    019A: 2B 06 2A 00                           sub ax , bounds2_y
+[ 403]    019E: 3B 06 2E 00                           cmp ax , bounds2_h
+[ 404]    01A2: 7E DC                                 jng loop_Render_Bound2
+[ 405]        :                                       ;----------
+[ 406]        :                                       
+[ 407]    01A4: 8B 0E 30 00                           mov cx , bounds3_x  ;coordinate X of pixel (column)
+[ 408]    01A8: 8B 16 32 00                           mov dx , bounds3_y  ;coordinate Y of pixel (row)
+[ 409]        :                                       
+[ 410]        :                                       ;----------
+[ 411]    01AC:                                       loop_Render_Bound3:
+[ 412]        :                                       
+[ 413]    01AC: B4 0C                                 mov ah , 0cH ;set to draw a pixel
+[ 414]    01AE: B0 0F                                 mov al , 0fH ;set color of the pixel
+[ 415]    01B0: CD 10                                 int 10H
+[ 416]        :                                       
+[ 417]        :                                       ;draw horizontal
+[ 418]    01B2: 41                                    inc cx ;increase the X coordinate (draw to the right)
+[ 419]        :                                       
+[ 420]    01B3: 8B C1                                 mov ax , cx
+[ 421]    01B5: 2B 06 30 00                           sub ax , bounds3_x
+[ 422]    01B9: 3B 06 34 00                           cmp ax , bounds3_w
+[ 423]    01BD: 7E ED                                 jng loop_Render_Bound3
+[ 424]        :                                       
+[ 425]        :                                       ;----------
+[ 426]        :                                       
+[ 427]        :                                       ;draw vertical
+[ 428]    01BF: 8B 0E 30 00                           mov cx , bounds3_x ;revert to starter column
+[ 429]        :                                       
+[ 430]    01C3: 42                                    inc dx
+[ 431]        :                                       
+[ 432]    01C4: 8B C2                                 mov ax , dx
+[ 433]    01C6: 2B 06 32 00                           sub ax , bounds3_y
+[ 434]    01CA: 3B 06 36 00                           cmp ax , bounds3_h
+[ 435]    01CE: 7E DC                                 jng loop_Render_Bound3
+[ 436]        :                                       
+[ 437]    01D0: C3                                    ret
+[ 438]        :                                       
+[ 439]        :                                       RENDER_BOUNDS ENDP
+[ 440]        :                                       
+[ 441]        :                                       ;-------------------------------------------------------------------------------------------- RENDER PAD
+[ 442]        :                                       ;used to render the pad which is used to bounce the ball
+[ 443]        :                                       
+[ 444]    01D1:                                       RENDER_PAD PROC
+[ 445]        :                                       
+[ 446]    01D1: 8B 0E 0E 00                           mov cx , pad_x  ;coordinate X of pixel (column)
+[ 447]    01D5: 8B 16 10 00                           mov dx , pad_y  ;coordinate Y of pixel (row)
+[ 448]        :                                       
+[ 449]        :                                       ;----------
+[ 450]    01D9:                                       loop_Render_Pad:
+[ 451]        :                                       
+[ 452]    01D9: B4 0C                                 mov ah , 0cH ;set to draw a pixel
+[ 453]    01DB: B0 0F                                 mov al , 0fH ;set color of the pixel
+[ 454]    01DD: CD 10                                 int 10H
+[ 455]        :                                       
+[ 456]        :                                       ;draw horizontal
+[ 457]    01DF: 41                                    inc cx ;increase the X coordinate (draw to the right)
+[ 458]        :                                       
+[ 459]    01E0: 8B C1                                 mov ax , cx
+[ 460]    01E2: 2B 06 0E 00                           sub ax , pad_x
+[ 461]    01E6: 3B 06 14 00                           cmp ax , pad_w ;if cx - padx is higher than the pad width stop and switch rows
+[ 462]    01EA: 7E ED                                 jng loop_Render_Pad
+[ 463]        :                                       
+[ 464]        :                                       ;----------
+[ 465]        :                                       
+[ 466]        :                                       ;draw vertical
+[ 467]    01EC: 8B 0E 0E 00                           mov cx , pad_x ;revert to starter column
+[ 468]        :                                       
+[ 469]    01F0: 42                                    inc dx
+[ 470]        :                                       
+[ 471]    01F1: 8B C2                                 mov ax , dx
+[ 472]    01F3: 2B 06 10 00                           sub ax , pad_y
+[ 473]    01F7: 3B 06 16 00                           cmp ax , pad_h ;if dx - pady is higher than the pad height stop and switch rows
+[ 474]    01FB: 7E DC                                 jng loop_Render_Pad
+[ 475]        :                                       
+[ 476]        :                                       
+[ 477]    01FD: C3                                    ret
+[ 478]        :                                       
+[ 479]        :                                       RENDER_PAD ENDP
+[ 480]        :                                       
+[ 481]        :                                       ;-------------------------------------------------------------------------------------------- MOVE BALL & COLLISIONS
+[ 482]        :                                       
+[ 483]    01FE:                                       TRANSFORM_BALL PROC
+[ 484]        :                                       
+[ 485]    01FE: A1 08 00                              mov ax , ball_vx ;add the x speed to the ball (neg or pos)
+[ 486]    0201: 01 06 04 00                           add ball_x , ax
+[ 487]        :                                       
+[ 488]        :                                       ;------------------------------------------------check collision with borders
+[ 489]        :                                       ;------------------------------------------------
+[ 490]        :                                       
+[ 491]        :                                       ;ball_x < 0 therefore collides with 0,Y (going left)
+[ 492]        :                                       
+[ 493]    0205: 83 3E 04 00 0C                        cmp ball_x , 12
+[ 494]    020A: 7D 03 E9 AD 00                        jl Neg_x
+[ 495]        :                                       
+[ 496]        :                                       ;ball_x > screen_w therefore collides with screen_w,Y (going right)
+[ 497]        :                                       
+[ 498]    020F: A1 1C 00                              mov ax , screen_w
+[ 499]    0212: 2B 06 0C 00                           sub ax , ball_s
+[ 500]    0216: 39 06 04 00                           cmp ball_x , ax
+[ 501]        :                                       ;jg Reset_pos
+[ 502]    021A: 7F 5D                                 jg GameOver
+[ 503]        :                                       
+[ 504]        :                                       ;----------------
+[ 505]        :                                       
+[ 506]    021C: A1 0A 00                              mov ax , ball_vy ;add the y speed to the ball (neg or pos)
+[ 507]    021F: 01 06 06 00                           add ball_y , ax
+[ 508]        :                                       
+[ 509]        :                                       ;ball_y < 0 therefore collides with X,0 (going up)
+[ 510]        :                                       
+[ 511]    0223: 83 3E 06 00 1B                        cmp ball_y , 27
+[ 512]    0228: 7D 03 E9 97 00                        jl Neg_y
+[ 513]        :                                       
+[ 514]        :                                       
+[ 515]        :                                       ;ball_y > screen_h therefore collides with X,screen_h (going down)
+[ 516]        :                                       
+[ 517]    022D: A1 1E 00                              mov ax , screen_h
+[ 518]    0230: 2B 06 0C 00                           sub ax , ball_s
+[ 519]    0234: 39 06 06 00                           cmp ball_y , ax
+[ 520]    0238: 7E 03 E9 87 00                        jg Neg_y
+[ 521]        :                                       
+[ 522]        :                                       ;------------------------------------------------check collisions with pad
+[ 523]        :                                       ;------------------------------------------------
+[ 524]        :                                       ;AABB rule sudo-code :
+[ 525]        :                                       ;ball_x + ball_s > pad_x && ball_x < pad_x + pad_w && ball_y + ball_s > pad_y && ball_y < pad_y + pad_h
+[ 526]        :                                       
+[ 527]    023D: A1 04 00                              mov ax , ball_x
+[ 528]    0240: 03 06 0C 00                           add ax , ball_s
+[ 529]    0244: 3B 06 0E 00                           cmp ax, pad_x
+[ 530]    0248: 7E 2E                                 jng No_Collision
+[ 531]        :                                       
+[ 532]        :                                       ;-------------
+[ 533]        :                                       
+[ 534]    024A: A1 0E 00                              mov ax , pad_x
+[ 535]    024D: 03 06 14 00                           add ax , pad_w
+[ 536]    0251: 39 06 04 00                           cmp ball_x , ax
+[ 537]    0255: 7D 21                                 jnl No_Collision
+[ 538]        :                                       
+[ 539]        :                                       ;-------------
+[ 540]        :                                       
+[ 541]    0257: A1 06 00                              mov ax , ball_y
+[ 542]    025A: 03 06 0C 00                           add ax , ball_s
+[ 543]    025E: 3B 06 10 00                           cmp ax , pad_y
+[ 544]    0262: 7E 14                                 jng No_Collision
+[ 545]        :                                       
+[ 546]        :                                       ;-------------
+[ 547]        :                                       
+[ 548]    0264: A1 10 00                              mov ax , pad_y
+[ 549]    0267: 03 06 16 00                           add ax , pad_h
+[ 550]    026B: 39 06 06 00                           cmp ball_y , ax
+[ 551]    026F: 7D 07                                 jnl No_Collision
+[ 552]        :                                       
+[ 553]        :                                       ;-------------
+[ 554]        :                                       
+[ 555]    0271: 80 06 1A 00 01                        add score , 1
+[ 556]    0276: EB 44                                 jmp Neg_x
+[ 557]        :                                       
+[ 558]        :                                       ;---------------
+[ 559]        :                                       
+[ 560]    0278:                                       No_Collision: ;if one of the ifs above is false  then we quit the proc
+[ 561]    0278: C3                                    ret
+[ 562]        :                                       
+[ 563]        :                                       ;----------------
+[ 564]    0279:                                       GameOver:    ;if ball crosses right side boundry
+[ 565]        :                                       
+[ 566]    0279: E8 73 FE                              call SET_GRAPHICS_MODE
+[ 567]        :                                       
+[ 568]    027C: B2 47                                 mov dl , 'G'
+[ 569]    027E: B4 02                                 mov ah , 2H
+[ 570]    0280: CD 21                                 int 21H
+[ 571]        :                                       
+[ 572]    0282: B2 41                                 mov dl , 'A'
+[ 573]    0284: B4 02                                 mov ah , 2H
+[ 574]    0286: CD 21                                 int 21H
+[ 575]        :                                       
+[ 576]    0288: B2 4D                                 mov dl , 'M'
+[ 577]    028A: B4 02                                 mov ah , 2H
+[ 578]    028C: CD 21                                 int 21H
+[ 579]        :                                       
+[ 580]    028E: B2 45                                 mov dl , 'E'
+[ 581]    0290: B4 02                                 mov ah , 2H
+[ 582]    0292: CD 21                                 int 21H
+[ 583]        :                                       
+[ 584]    0294: B2 20                                 mov dl , ' '
+[ 585]    0296: B4 02                                 mov ah , 2H
+[ 586]    0298: CD 21                                 int 21H
+[ 587]        :                                       
+[ 588]    029A: B2 4F                                 mov dl , 'O'
+[ 589]    029C: B4 02                                 mov ah , 2H
+[ 590]    029E: CD 21                                 int 21H
+[ 591]        :                                       
+[ 592]    02A0: B2 56                                 mov dl , 'V'
+[ 593]    02A2: B4 02                                 mov ah , 2H
+[ 594]    02A4: CD 21                                 int 21H
+[ 595]        :                                       
+[ 596]    02A6: B2 45                                 mov dl , 'E'
+[ 597]    02A8: B4 02                                 mov ah , 2H
+[ 598]    02AA: CD 21                                 int 21H
+[ 599]        :                                       
+[ 600]    02AC: B2 52                                 mov dl , 'R'
+[ 601]    02AE: B4 02                                 mov ah , 2H
+[ 602]    02B0: CD 21                                 int 21H
+[ 603]        :                                       
+[ 604]    02B2: E9 DE FD                              jmp Done:
+[ 605]        :                                       
+[ 606]        :                                       ;each bounce calls random color set
+[ 607]        :                                       
+[ 608]        :                                       ;---------------- ;Alternative for GameOver (with implementing life system)
+[ 609]    02B5:                                       Reset_pos:
+[ 610]    02B5: E8 6E 00                              call RANDOM
+[ 611]    02B8: E8 27 FE                              call RESET
+[ 612]        :                                       
+[ 613]        :                                       ;sub life , 1
+[ 614]        :                                       ;cmp life , 0
+[ 615]        :                                       ;je GameOver
+[ 616]        :                                       
+[ 617]    02BB: C3                                    ret
+[ 618]        :                                       ;---------------- ;used to multiply the x speed of the ball by -1
+[ 619]    02BC:                                       Neg_x:
+[ 620]    02BC: E8 67 00                              call RANDOM
+[ 621]    02BF: F7 1E 08 00                           neg ball_vx
+[ 622]    02C3: C3                                    ret
+[ 623]        :                                       ;---------------  ;used to multiply the y speed of the ball by -1
+[ 624]    02C4:                                       Neg_y:
+[ 625]    02C4: E8 5F 00                              call RANDOM
+[ 626]    02C7: F7 1E 0A 00                           neg ball_vy
+[ 627]    02CB: C3                                    ret
+[ 628]        :                                       ;---------------
+[ 629]        :                                       
+[ 630]        :                                       TRANSFORM_BALL ENDP
+[ 631]        :                                       
+[ 632]        :                                       ;-------------------------------------------------------------------------------------------- MOVE PAD & COLLISIONS
+[ 633]        :                                       
+[ 634]    02CC:                                       TRANSFORM_PAD PROC
+[ 635]        :                                       
+[ 636]        :                                       ;check if key is being pressed
+[ 637]    02CC: B4 01                                 mov ah , 01H
+[ 638]    02CE: CD 16                                 int 16H
+[ 639]    02D0: 74 4A                                 jz No_key ;if no key is being pressed we return the proc
+[ 640]        :                                       
+[ 641]        :                                       ;----------
+[ 642]        :                                       
+[ 643]        :                                       ;check the specific key
+[ 644]    02D2: B4 00                                 mov ah , 00H
+[ 645]    02D4: CD 16                                 int 16H
+[ 646]        :                                       
+[ 647]    02D6: 3C 77                                 cmp al , 'w' ;when the key is euqal to w
+[ 648]    02D8: 74 0C                                 je MoveUp_pad
+[ 649]    02DA: 3C 57                                 cmp al , 'W' ;when the key is euqal to W
+[ 650]    02DC: 74 08                                 je MoveUp_pad
+[ 651]        :                                       
+[ 652]    02DE: 3C 73                                 cmp al , 's' ;when the key is euqal to s
+[ 653]    02E0: 74 1A                                 je MoveDown_pad
+[ 654]    02E2: 3C 53                                 cmp al , 'S' ;when the key is euqal to S
+[ 655]    02E4: 74 16                                 je MoveDown_pad
+[ 656]        :                                       
+[ 657]        :                                       ;----------
+[ 658]        :                                       
+[ 659]    02E6:                                       MoveUp_pad: ;move pad up if W is pressed
+[ 660]        :                                       
+[ 661]    02E6: A1 12 00                              mov ax , pad_vy
+[ 662]    02E9: 29 06 10 00                           sub pad_y , ax
+[ 663]        :                                       
+[ 664]    02ED: 83 3E 10 00 1B                        cmp pad_y , 27    ;if the pad reached the upper limit
+[ 665]    02F2: 7C 01                                 jl DontMoveUp_Pad
+[ 666]        :                                       
+[ 667]    02F4: C3                                    ret
+[ 668]        :                                       
+[ 669]    02F5:                                       DontMoveUp_Pad:       ;dont allow pad to move further upwards
+[ 670]        :                                       
+[ 671]    02F5: C7 06 10 00 1B 00                     mov pad_y , 27
+[ 672]        :                                       
+[ 673]    02FB: C3                                    ret
+[ 674]        :                                       
+[ 675]        :                                       ;----------
+[ 676]        :                                       
+[ 677]    02FC:                                       MoveDown_pad: ;move pad down if S is pressed
+[ 678]        :                                       
+[ 679]    02FC: A1 12 00                              mov ax , pad_vy
+[ 680]    02FF: 01 06 10 00                           add pad_y , ax
+[ 681]        :                                       
+[ 682]    0303: A1 1E 00                              mov ax , screen_h
+[ 683]    0306: 2B 06 16 00                           sub ax , pad_h
+[ 684]    030A: 39 06 10 00                           cmp pad_y , ax       ;if the pad reached the bottom limit
+[ 685]    030E: 7F 01                                 jg DontMoveDown_Pad
+[ 686]        :                                       
+[ 687]    0310: C3                                    ret
+[ 688]        :                                       
+[ 689]    0311:                                       DontMoveDown_Pad:        ;dont allow pad to move further downwards
+[ 690]        :                                       
+[ 691]    0311: A1 1E 00                              mov ax , screen_h
+[ 692]    0314: 2B 06 16 00                           sub ax , pad_h
+[ 693]    0318: A3 10 00                              mov pad_y , ax
+[ 694]        :                                       
+[ 695]    031B: C3                                    ret
+[ 696]        :                                       
+[ 697]        :                                       ;----------
+[ 698]        :                                       
+[ 699]    031C:                                       No_Key:
+[ 700]        :                                       
+[ 701]    031C: C3                                    ret
+[ 702]        :                                       
+[ 703]        :                                       TRANSFORM_PAD ENDP
+[ 704]        :                                       
+[ 705]    031D: C3                                    ret
+[ 706]        :                                       
+[ 707]        :                                       ;-------------------------------------------------------------------------------------------- LED Display : just for test
+[ 708]        :                                       
+[ 709]    031E:                                       LED PROC
+[ 710]        :                                       
+[ 711]        :                                       #start=led_display.exe#  ;boot up LED display
+[ 712]        :                                       
+[ 713]    031E: A0 1A 00                              mov al, score
+[ 714]    0321: B4 00                                 mov ah , 00H
+[ 715]    0323: E7 C7                                 out 199, ax ;print out score on LED
+[ 716]        :                                       
+[ 717]    0325: C3                                    ret
+[ 718]        :                                       
+[ 719]        :                                       LED ENDP
+[ 720]        :                                       
+[ 721]        :                                       ;-------------------------------------------------------------------------------------------- RANDOM BETWEEN 0 and 9 SOURCE : STACKOVERFLOW
+[ 722]        :                                       
+[ 723]    0326:                                       RANDOM PROC
+[ 724]        :                                       
+[ 725]    0326: B4 00                                 mov ah, 00H  ; interrupts to get system time
+[ 726]    0328: CD 1A                                 int 1aH      ; CX:DX now hold number of clock ticks since midnight
+[ 727]        :                                       
+[ 728]    032A: 8B C2                                 mov ax , dx
+[ 729]    032C: 33 D2                                 xor dx , dx
+[ 730]    032E: B9 0A 00                              mov cx , 10
+[ 731]    0331: F7 F1                                 div cx       ; here dx contains the remainder of the division - from 0 to 9
+[ 732]        :                                       
+[ 733]    0333: 80 C2 01                              add dl , 01H
+[ 734]    0336: 88 16 19 00                           mov random_col , dl
+[ 735]        :                                       
+[ 736]    033A: C3                                    ret
+[ 737]        :                                       
+[ 738]        :                                       RANDOM ENDP
+[ 739]        :                                       
+[ 740]        :                                       
+[ 741]        :                                       
+[ 742]        :                                       ;-------------------------------------------------------------------------------------------- Unused Lines
+[ 743]        :                                       ;include in main for single pixles ;call SET_PIXEL
+[ 744]        :                                       
+ 
+===================================================================================================
+ 
+EXE HEADER - bytes from 0000 to 01FF inclusive.
+
+0000: 4D      -   exe signature (M)
+0001: 5A      -   exe signature (Z)
+0002: 3B      -   bytes on last page (l.byte)
+0003: 01      -   bytes on last page (h.byte)
+0004: 03      -   512 byte pages in file (l.byte)
+0005: 00      -   512 byte pages in file (h.byte)
+0006: 01      -   relocations (l.byte)
+0007: 00      -   relocations (h.byte)
+0008: 20      -   paragraphs in header (l.byte)
+0009: 00      -   paragraphs in header (h.byte)
+000A: 00      -   minimum memory (l.byte)
+000B: 00      -   minimum memory (h.byte)
+000C: FF      -   maximum memory (l.byte)
+000D: FF      -   maximum memory (h.byte)
+000E: 00      -   SS - stack segment (l.byte)
+000F: 00      -   SS - stack segment (h.byte)
+0010: 40      -   SP - stack pointer (l.byte)
+0011: 00      -   SP - stack pointer (h.byte)
+0012: 0A      -   check sum (l.byte)
+0013: 64      -   check sum (h.byte)
+0014: 00      -   IP - instruction pointer (l.byte)
+0015: 00      -   IP - instruction pointer (h.byte)
+0016: 08      -   CS - code segment (l.byte)
+0017: 00      -   CS - code segment (h.byte)
+0018: 1E      -   relocation table adress (l.byte)
+0019: 00      -   relocation table adress (h.byte)
+001A: 00      -   overlay number (l.byte)
+001B: 00      -   overlay number (h.byte)
+001C: 01      -   signature (l.byte)
+001D: 00      -   signature (h.byte)
+001E: 01      -   relocation table - offset inside segment (l.byte)
+001F: 00      -   relocation table - offset inside segment (h.byte)
+0020: 08      -   relocation table - segment anchor (l.byte)
+0021: 00      -   relocation table - segment anchor (h.byte)
+0022 to 01FF  -   reserved relocation area  (00) 
+
+
+
+
+===================================================================================================
